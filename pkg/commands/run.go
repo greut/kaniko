@@ -68,10 +68,9 @@ func (r *RunCommand) ExecuteCommand(config *v1.Config, buildArgs *dockerfile.Bui
 	cmd.Stderr = os.Stderr
 	replacementEnvs := buildArgs.ReplacementEnvs(config.Env)
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	var userStr string
+
 	// If specified, run the command as a specific user
 	if config.User != "" {
-		userStr = config.User
 		uid, gid, err := util.GetUIDAndGIDFromString(config.User, false)
 		if err != nil {
 			return err
@@ -79,7 +78,7 @@ func (r *RunCommand) ExecuteCommand(config *v1.Config, buildArgs *dockerfile.Bui
 		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 	}
 
-	cmd.Env = addDefaultHOME(userStr, replacementEnvs)
+	cmd.Env = addDefaultHOME(config.User, replacementEnvs)
 
 	if err := cmd.Start(); err != nil {
 		return errors.Wrap(err, "starting command")
@@ -117,14 +116,28 @@ func addDefaultHOME(u string, envs []string) []string {
 
 	// If user is set to username, set value of HOME to /home/${user}
 	// Otherwise the user is set to uid and HOME is /
-	home := "/"
 	userObj, err := userLookup(u)
-	if err == nil {
-		if userObj.HomeDir != "" {
-			home = userObj.HomeDir
+	if err != nil {
+		if e, ok := err.(user.UnknownUserError); ok {
+			logrus.Infof(e.Error())
 		} else {
-			home = fmt.Sprintf("/home/%s", userObj.Username)
+			logrus.Debugf("user lookup failure for %s. %s", u, err)
 		}
+
+		parts := strings.SplitN(u, ":", 2)
+		if parts[0] == "" {
+			return envs
+		}
+
+		logrus.Infof("Using guessed homedir based on username")
+		userObj = &user.User{
+			Username: parts[0],
+		}
+	}
+
+	home := userObj.HomeDir
+	if home == "" {
+		home = fmt.Sprintf("/home/%s", userObj.Username)
 	}
 
 	return append(envs, fmt.Sprintf("%s=%s", constants.HOME, home))

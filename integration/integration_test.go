@@ -189,6 +189,7 @@ func TestRun(t *testing.T) {
 		t.Run("test_"+dockerfile, func(t *testing.T) {
 			dockerfile := dockerfile
 			t.Parallel()
+
 			if _, ok := imageBuilder.DockerfilesToIgnore[dockerfile]; ok {
 				t.SkipNow()
 			}
