@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/user"
 	"strings"
 	"syscall"
 
@@ -40,7 +39,7 @@ type RunCommand struct {
 
 // for testing
 var (
-	userLookup = user.Lookup
+	userLookup = util.LookupUser
 )
 
 func (r *RunCommand) ExecuteCommand(config *v1.Config, buildArgs *dockerfile.BuildArgs) error {
@@ -78,7 +77,12 @@ func (r *RunCommand) ExecuteCommand(config *v1.Config, buildArgs *dockerfile.Bui
 		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 	}
 
-	cmd.Env = addDefaultHOME(config.User, replacementEnvs)
+	env, err := r.addDefaultHOME(config.User, replacementEnvs)
+	if err != nil {
+		return errors.Wrap(err, "adding default HOME variable")
+	}
+
+	cmd.Env = env
 
 	if err := cmd.Start(); err != nil {
 		return errors.Wrap(err, "starting command")
@@ -101,46 +105,28 @@ func (r *RunCommand) ExecuteCommand(config *v1.Config, buildArgs *dockerfile.Bui
 }
 
 // addDefaultHOME adds the default value for HOME if it isn't already set
-func addDefaultHOME(u string, envs []string) []string {
+func (r *RunCommand) addDefaultHOME(u string, envs []string) ([]string, error) {
 	for _, env := range envs {
 		split := strings.SplitN(env, "=", 2)
 		if split[0] == constants.HOME {
-			return envs
+			return envs, nil
 		}
 	}
 
 	// If user isn't set, set default value of HOME
 	if u == "" || u == constants.RootUser {
-		return append(envs, fmt.Sprintf("%s=%s", constants.HOME, constants.DefaultHOMEValue))
+		return append(envs, fmt.Sprintf("%s=%s", constants.HOME, constants.DefaultHOMEValue)), nil
 	}
 
-	// If user is set to username, set value of HOME to /home/${user}
-	// Otherwise the user is set to uid and HOME is /
-	userObj, err := userLookup(u)
+	parts := strings.SplitN(u, ":", 2)
+	userName := parts[0]
+
+	userObj, err := userLookup(userName)
 	if err != nil {
-		if e, ok := err.(user.UnknownUserError); ok {
-			logrus.Infof(e.Error())
-		} else {
-			logrus.Debugf("user lookup failure for %s. %s", u, err)
-		}
-
-		parts := strings.SplitN(u, ":", 2)
-		if parts[0] == "" {
-			return envs
-		}
-
-		logrus.Infof("Using guessed homedir based on username")
-		userObj = &user.User{
-			Username: parts[0],
-		}
+		return nil, err
 	}
 
-	home := userObj.HomeDir
-	if home == "" {
-		home = fmt.Sprintf("/home/%s", userObj.Username)
-	}
-
-	return append(envs, fmt.Sprintf("%s=%s", constants.HOME, home))
+	return append(envs, fmt.Sprintf("%s=%s", constants.HOME, userObj.HomeDir)), nil
 }
 
 // String returns some information about the command for the image config

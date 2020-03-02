@@ -389,13 +389,13 @@ func GetUserFromUsername(userStr string, groupStr string, fallbackToUID bool) (s
 }
 
 func Lookup(userStr string) (*user.User, error) {
-	userObj, err := user.Lookup(userStr)
+	userObj, err := LookupUser(userStr)
 	if err != nil {
 		if _, ok := err.(user.UnknownUserError); !ok {
 			return nil, err
 		}
 		// Lookup by id
-		userObj, err = user.LookupId(userStr)
+		userObj, err = LookupUserID(userStr)
 		if err != nil {
 			return nil, err
 		}

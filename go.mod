@@ -41,6 +41,7 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/minio/highwayhash v1.0.0
 	github.com/moby/buildkit v0.0.0-20191111154543-00bfbab0390c
+	github.com/opencontainers/runc v1.0.0-rc8.0.20190621203724-f4982d86f7fd
 	github.com/opencontainers/runtime-spec v1.0.1 // indirect
 	github.com/opencontainers/selinux v1.0.0-rc1 // indirect
 	github.com/opentracing/opentracing-go v1.0.2 // indirect
