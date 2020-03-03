@@ -356,7 +356,7 @@ func GetUIDAndGIDFromString(userGroupString string, fallbackToUID bool) (uint32,
 
 func GetUserFromUsername(userStr string, groupStr string, fallbackToUID bool) (string, string, error) {
 	// Lookup by username
-	userObj, err := user.Lookup(userStr)
+	userObj, err := Lookup(userStr)
 	if err != nil {
 		return "", "", err
 	}

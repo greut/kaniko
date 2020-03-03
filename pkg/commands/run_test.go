@@ -66,8 +66,8 @@ func Test_addDefaultHOME(t *testing.T) {
 			name: "HOME not set and user and homedir for the user set",
 			user: "www-add",
 			mockUser: &user.User{
-				Name: "www-add",
-				Home: "/home/some-other",
+				Username: "www-add",
+				HomeDir:  "/home/some-other",
 			},
 			initial: []string{
 				"PATH=/something/else",
@@ -81,7 +81,7 @@ func Test_addDefaultHOME(t *testing.T) {
 			name: "HOME not set and user set",
 			user: "www-add",
 			mockUser: &user.User{
-				Name: "www-add",
+				Username: "www-add",
 			},
 			initial: []string{
 				"PATH=/something/else",
@@ -95,7 +95,7 @@ func Test_addDefaultHOME(t *testing.T) {
 			name: "HOME not set and user is set",
 			user: "newuser",
 			mockUser: &user.User{
-				Name: "newuser",
+				Username: "newuser",
 			},
 			initial: []string{
 				"PATH=/something/else",
@@ -109,7 +109,7 @@ func Test_addDefaultHOME(t *testing.T) {
 			name: "HOME not set and user is set to root",
 			user: "root",
 			mockUser: &user.User{
-				Name: "root",
+				Username: "root",
 			},
 			initial: []string{
 				"PATH=/something/else",
@@ -122,10 +122,10 @@ func Test_addDefaultHOME(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			userLookup = func(username string) (user.User, error) { return *test.mockUser, nil }
+			userLookup = func(username string) (*user.User, error) { return test.mockUser, nil }
 			defer func() { userLookup = user.Lookup }()
-			actual := addDefaultHOME(test.user, test.initial)
-			testutil.CheckErrorAndDeepEqual(t, false, nil, test.expected, actual)
+			actual, err := addDefaultHOME(test.user, test.initial)
+			testutil.CheckErrorAndDeepEqual(t, false, err, test.expected, actual)
 		})
 	}
 }
