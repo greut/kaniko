@@ -40,7 +40,6 @@ type RunCommand struct {
 
 // for testing
 var (
-	//userLookup = util.LookupUser
 	userLookup = user.Lookup
 )
 
