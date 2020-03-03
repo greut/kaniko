@@ -356,7 +356,7 @@ func GetUIDAndGIDFromString(userGroupString string, fallbackToUID bool) (uint32,
 
 func GetUserFromUsername(userStr string, groupStr string, fallbackToUID bool) (string, string, error) {
 	// Lookup by username
-	userObj, err := Lookup(userStr)
+	userObj, err := user.Lookup(userStr)
 	if err != nil {
 		return "", "", err
 	}
@@ -389,13 +389,13 @@ func GetUserFromUsername(userStr string, groupStr string, fallbackToUID bool) (s
 }
 
 func Lookup(userStr string) (*user.User, error) {
-	userObj, err := LookupUser(userStr)
+	userObj, err := user.Lookup(userStr)
 	if err != nil {
 		if _, ok := err.(user.UnknownUserError); !ok {
 			return nil, err
 		}
 		// Lookup by id
-		userObj, err = LookupUserID(userStr)
+		userObj, err = user.LookupId(userStr)
 		if err != nil {
 			return nil, err
 		}

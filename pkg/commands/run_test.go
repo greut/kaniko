@@ -22,15 +22,15 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 	"testing"
 
 	"github.com/GoogleContainerTools/kaniko/pkg/dockerfile"
-	//"github.com/GoogleContainerTools/kaniko/testutil"
+	"github.com/GoogleContainerTools/kaniko/testutil"
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 )
 
-/*
 func Test_addDefaultHOME(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -123,13 +123,12 @@ func Test_addDefaultHOME(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			userLookup = func(username string) (user.User, error) { return *test.mockUser, nil }
-			defer func() { userLookup = user.LookupUser }()
+			defer func() { userLookup = user.Lookup }()
 			actual := addDefaultHOME(test.user, test.initial)
 			testutil.CheckErrorAndDeepEqual(t, false, nil, test.expected, actual)
 		})
 	}
 }
-*/
 
 func prepareTarFixture(fileNames []string) ([]byte, error) {
 	dir, err := ioutil.TempDir("/tmp", "tar-fixture")
