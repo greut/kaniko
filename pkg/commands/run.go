@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
 	"strings"
 	"syscall"
 
@@ -39,7 +40,8 @@ type RunCommand struct {
 
 // for testing
 var (
-	userLookup = util.LookupUser
+	//userLookup = util.LookupUser
+	userLookup = user.Lookup
 )
 
 func (r *RunCommand) ExecuteCommand(config *v1.Config, buildArgs *dockerfile.BuildArgs) error {
