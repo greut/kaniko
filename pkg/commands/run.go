@@ -78,7 +78,7 @@ func (r *RunCommand) ExecuteCommand(config *v1.Config, buildArgs *dockerfile.Bui
 		cmd.SysProcAttr.Credential = &syscall.Credential{Uid: uid, Gid: gid}
 	}
 
-	env, err := r.addDefaultHOME(config.User, replacementEnvs)
+	env, err := addDefaultHOME(config.User, replacementEnvs)
 	if err != nil {
 		return errors.Wrap(err, "adding default HOME variable")
 	}
@@ -106,7 +106,7 @@ func (r *RunCommand) ExecuteCommand(config *v1.Config, buildArgs *dockerfile.Bui
 }
 
 // addDefaultHOME adds the default value for HOME if it isn't already set
-func (r *RunCommand) addDefaultHOME(u string, envs []string) ([]string, error) {
+func addDefaultHOME(u string, envs []string) ([]string, error) {
 	for _, env := range envs {
 		split := strings.SplitN(env, "=", 2)
 		if split[0] == constants.HOME {

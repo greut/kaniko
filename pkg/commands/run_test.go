@@ -82,6 +82,7 @@ func Test_addDefaultHOME(t *testing.T) {
 			user: "www-add",
 			mockUser: &user.User{
 				Username: "www-add",
+				HomeDir:  "/home/www-add",
 			},
 			initial: []string{
 				"PATH=/something/else",
@@ -96,6 +97,7 @@ func Test_addDefaultHOME(t *testing.T) {
 			user: "newuser",
 			mockUser: &user.User{
 				Username: "newuser",
+				HomeDir:  "/home/newuser",
 			},
 			initial: []string{
 				"PATH=/something/else",
@@ -110,6 +112,7 @@ func Test_addDefaultHOME(t *testing.T) {
 			user: "root",
 			mockUser: &user.User{
 				Username: "root",
+				HomeDir:  "/root",
 			},
 			initial: []string{
 				"PATH=/something/else",
